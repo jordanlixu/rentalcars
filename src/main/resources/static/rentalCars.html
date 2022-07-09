@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head> 
+<meta charset="utf-8"> 
+<title>租车易</title> 
+<script src="https://cdn.staticfile.org/jquery/2.2.4/jquery.min.js"></script>	
+<script>	
+ $(function(){
+           // $("#rental").on('submit',function(e){
+           $("#rentCar").click(function(e) {
+                    //阻止表单的默认提交事件
+                    e.preventDefault()
+                //alert("123")
+                    //serialize这个方法能获取到所有input 的值但是必须设置name 的属性
+                var mayData =$('#rental').serialize()
+                $.ajax({
+                    url:"/rentalCars",
+                    type:"POST",
+                    data:JSON.stringify($('#rental').serializeObject()),
+                    contentType:"application/json",  //缺失会出现URL编码，无法转成json对象
+                    async: false
+                }).success(function (responseData) {
+                    if(responseData.code == "111111"){
+                        alert(responseData.msg)
+                    }else {
+                        alert("成功租车 "+responseData.data)
+                    }
+                })
+            })
+        })
+
+
+ $(function(){
+     // $("#rental").on('submit',function(e){
+     $("#returnCar").click(function(e) {
+         //阻止表单的默认提交事件
+         e.preventDefault()
+        // alert("456")
+         //serialize这个方法能获取到所有input 的值但是必须设置name 的属性
+         var mayData =$('#rental').serialize()
+         $.ajax({
+             url:"/rentalCars/returnCar",
+             type:"POST",
+             data:JSON.stringify($('#rental').serializeObject()),
+             contentType:"application/json",  //缺失会出现URL编码，无法转成json对象
+             async: false
+         }).success(function (responseData) {
+             if(responseData.code == "111111"){
+                 alert(responseData.msg)
+             }else {
+                 alert("成功还车 "+responseData.data)
+             }
+         })
+     })
+ })
+
+
+ $(function(){
+     // $("#rental").on('submit',function(e){
+     $("#clear").click(function(e) {
+         //阻止表单的默认提交事件
+         e.preventDefault()
+         //alert("789")
+         //serialize这个方法能获取到所有input 的值但是必须设置name 的属性
+         $.ajax({
+             url:"/rentalCars/clear",
+             type:"POST",
+             data:JSON.stringify($('#rental').serializeObject()),
+             contentType:"application/json",  //缺失会出现URL编码，无法转成json对象
+             async: false
+         }).success(function (responseData) {
+             if(responseData.code == "111111"){
+                 alert(responseData.msg)
+             }else {
+                 alert("清除数据 "+responseData.data)
+             }
+         })
+     })
+ })
+
+
+
+ /**
+  * 自动将form表单封装成json对象
+  */
+ $.fn.serializeObject = function() {
+     var o = {};
+     var a = this.serializeArray();
+     $.each(a, function() {
+         if (o[this.name]) {
+             if (!o[this.name].push) {
+                 o[this.name] = [ o[this.name] ];
+             }
+             o[this.name].push(this.value || '');
+         } else {
+             o[this.name] = this.value || '';
+         }
+     });
+     return o;
+ };
+</script>
+</head> 
+<body>
+	
+<form action="" id="rental" method="post">
+租车可选列表:<br/>
+    <div><label><input name="carId" type="radio" value="BD888" />BMW 650 $100/day black</label></div>
+    <div><label><input name="carId" type="radio" value="AJ889" />BMW 650 $100/day white </label></div>
+    <div><label><input name="carId" type="radio" value="KY880" />Toyota Camry $90/day red</label></div>
+    <div><label><input name="carId" type="radio" value="RT881" />Toyota Camry $90/day blue</label> </div>
+<br><br>
+    <div>我手机号 <input name="phoneNum" type="text" size="10"/> </div>
+    <div>取车时间 <input name="startDay" type="text" size="10"/> 格式"yyyy-MM-dd"</div>
+    <div>还车时间 <input name="endDay" type="text" size="10"/> 格式"yyyy-MM-dd"</div>
+<br><br>
+<div><input id="rentCar" type="submit" value="租车" />          <input id="returnCar" type="submit" value="还车" /> </div>
+<div><input id="clear" type="submit" value="清除数据" /></div>
+</form>
+
+	
+</body>
+</html>
