@@ -57,8 +57,9 @@ public class RentalCarsService {
         Car car = carsRepository.findCarByCarId(carId);
         if (car!=null){
             return car.getRentPerDay().multiply(new BigDecimal(betweenDay));
+        }else {
+            throw new IllegalArgumentException("车牌号不存在");
         }
-        return new BigDecimal(0);
     }
 
     public  Optional<RentalCars>  queryCustomerRentalInfo(String carId, String phoneNum) {

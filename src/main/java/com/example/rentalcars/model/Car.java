@@ -1,6 +1,7 @@
 package com.example.rentalcars.model;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -13,15 +14,20 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
+    @ApiModelProperty("主键id")
     private long id;
 
     @Column(name = "car_id")
+    @ApiModelProperty("车牌号码")
     private String carId;
 
+
+    @ApiModelProperty("车型")
     private String model;
 
 
     @Column(name = "rent_per_day")
+    @ApiModelProperty("每天的租金")
     private BigDecimal rentPerDay;
 
     public long getId() {
