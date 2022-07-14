@@ -32,8 +32,12 @@ public class RentalCarsService {
     }
 
     public boolean isTheCarRentedInSpecificTime(String carId, Date startDay, Date endDay) {
-       boolean isTheCarRented = false;
-       List<RentalCars> list  = rentalCarsRepository.findRentalCarsByCarIdAndReturnFlag(carId,"N");
+        Car car = carsRepository.findCarByCarId(carId);
+        if (car==null){
+            throw new IllegalArgumentException("车牌号不存在");
+        }
+        boolean isTheCarRented = false;
+        List<RentalCars> list  = rentalCarsRepository.findRentalCarsByCarIdAndReturnFlag(carId,"N");
         for (RentalCars rentalInfo:list) {
             if(rentalInfo.getStartDay().after(endDay)||rentalInfo.getEndDay().before(startDay)){
                 continue;
@@ -49,7 +53,7 @@ public class RentalCarsService {
 //        long difference = (endDay.getTime()-startDay.getTime())/86400000;
 //        long days = Math.abs(difference)+1;  //按天计算费用
         if(endDay.before(startDay)){
-            new BigDecimal(0);
+            return new BigDecimal(0);
         }
         long betweenDay = DateUtil.between(startDay, endDay, DateUnit.DAY)+1;
 
@@ -62,13 +66,16 @@ public class RentalCarsService {
         }
     }
 
-    public  Optional<RentalCars>  queryCustomerRentalInfo(String carId, String phoneNum) {
-        List<RentalCars> rentalInfoList = rentalCarsRepository.findRentalCarsByCarIdAndPhoneNumOrderByStartDay(carId,phoneNum);
-        Optional<RentalCars> rental = rentalInfoList.stream().filter(s->s.getReturnFlag().equals("N")).findFirst();
+    public  Optional<RentalCars>  queryCustomerRentalInfo(long id, String phoneNum) {
+        Optional<RentalCars> rental  = rentalCarsRepository.findRentalCarsByIdAndPhoneNumAndReturnFlag(id,phoneNum,"N");
         return rental ;
     }
 
     public void clear(){
         rentalCarsRepository.deleteAll();
+    }
+
+    public List<RentalCars> queryRentedCars(String phoneNum,String returnFlag) {
+        return rentalCarsRepository.findRentalCarsByPhoneNumAndReturnFlag(phoneNum,returnFlag);
     }
 }

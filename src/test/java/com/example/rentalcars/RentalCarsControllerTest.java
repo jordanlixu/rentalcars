@@ -1,7 +1,12 @@
 package com.example.rentalcars;
 
 
+import cn.hutool.json.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.example.rentalcars.common.Constants;
+import com.example.rentalcars.common.ResultEntity;
 import com.example.rentalcars.controller.RentalCarsController;
+import com.alibaba.fastjson.JSONObject;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -15,9 +20,16 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -41,10 +53,21 @@ public class RentalCarsControllerTest extends AbstractTransactionalJUnit4SpringC
 
     @Test
     public void Test_01_RentCarSuccess() throws Exception{
-        String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-08\"}";
-        mockMvc.perform(post("/rentalCars").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+        Map<String, String> body = new HashMap<>();
+        body.put("phoneNum","13760403346");
+        body.put("carId","KY880");
+        body.put("startDay","2022-07-06");
+        body.put("endDay","2022-07-08");
+        String requestJson =JSONObject.toJSONString(body);
+        Map<String, String> expectResponseBody = new HashMap<>();
+        expectResponseBody.put("code", Constants.SUCCESS_CODE);
+        expectResponseBody.put("msg","KY880 rent total:270.00");
+        expectResponseBody.put("data",new BigDecimal("270.00").toString());
+        String expectJson = JSONObject.toJSONString(expectResponseBody);
+        // String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-08\"}";
+        mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"code\":\"000000\",\"msg\":\"succeed\",\"data\":\"KY880 rent total:270.00\"}"))
+                .andExpect(content().json(expectJson))
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
 
@@ -52,10 +75,20 @@ public class RentalCarsControllerTest extends AbstractTransactionalJUnit4SpringC
 
     @Test
     public void Test_02_RentTheSameCarAtAnotherTimeSuccess() throws Exception{
-        String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-08\"}";
-        mockMvc.perform(post("/rentalCars").contentType(MediaType.APPLICATION_JSON).content(requestJson));
-        requestJson =  "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-09\",\"endDay\":\"2022-07-10\"}";
-        mockMvc.perform(post("/rentalCars").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+        Map<String, String> body = new HashMap<>();
+        body.put("phoneNum","13760403346");
+        body.put("carId","KY880");
+        body.put("startDay","2022-07-06");
+        body.put("endDay","2022-07-08");
+        String requestJson =JSONObject.toJSONString(body);
+
+        mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson)).andReturn();
+        body.put("startDay","2022-07-09");
+        body.put("endDay","2022-07-10");
+        requestJson =JSONObject.toJSONString(body);
+
+        // String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-08\"}";
+        mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.containsString("000000")))
                 .andDo(MockMvcResultHandlers.print())
@@ -66,35 +99,56 @@ public class RentalCarsControllerTest extends AbstractTransactionalJUnit4SpringC
 
     @Test
     public void Test_03_RentTheSameCarAtOverlappedTimeFail() throws Exception{
-        /*
-            {
-           "phoneNum":"13760403346",
-           "carId":"AJ889",
-           "startDay":"2022-07-06",
-           "endDay":"2022-07-08"
-            }
-         */
 
-        String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-08\"}";
-        mockMvc.perform(post("/rentalCars").contentType(MediaType.APPLICATION_JSON).content(requestJson));
-        requestJson =  "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-07\",\"endDay\":\"2022-07-10\"}";
-        mockMvc.perform(post("/rentalCars").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+        Map<String, String> body = new HashMap<>();
+        body.put("phoneNum","13760403346");
+        body.put("carId","KY880");
+        body.put("startDay","2022-07-06");
+        body.put("endDay","2022-07-08");
+        String requestJson =JSONObject.toJSONString(body);
+
+        mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson)).andReturn();
+        body.put("startDay","2022-07-07");
+        body.put("endDay","2022-07-10");
+        requestJson =JSONObject.toJSONString(body);
+
+        // String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-08\"}";
+        mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"code\":\"111111\",\"msg\":\"这个车在您选择的时间段已被其他客户租用\",\"data\":null}"))
+                //.andExpect(content().string(Matchers.containsString("000000")))
+                .andExpect(content().json("{\"code\":\"111111\",\"msg\":\"在选择的时间段已被租用\",\"data\":null}"))
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
-
 
     }
 
     @Test
     public void Test_04_ReturnTheCar() throws Exception{
-        String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-09\"}";
-        mockMvc.perform(post("/rentalCars").contentType(MediaType.APPLICATION_JSON).content(requestJson));
-        requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\"}";
-        mockMvc.perform(post("/rentalCars/returnCar").contentType(MediaType.APPLICATION_JSON).content(requestJson))
+
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("phoneNum","13760403346");
+        body.put("carId","KY880");
+        body.put("startDay","2022-07-06");
+        body.put("endDay","2022-07-08");
+        String requestJson =JSONObject.toJSONString(body);
+        mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson)).andReturn();
+
+
+        MvcResult mvcResult = mockMvc.perform(get("/rentalCars/query?phoneNum=13760403346")).andReturn();
+        String content = mvcResult.getResponse().getContentAsString();
+        JSONArray object = (JSONArray)JSONObject.parseObject(content).get("data");
+        JSONObject object1 =(JSONObject)object.get(0);
+        Integer id = (Integer)object1.get("id");
+        body.clear();
+        body.put("id",id.intValue());
+        body.put("phoneNum","13760403346");
+        body.put("endDay","2022-07-10");
+        requestJson =JSONObject.toJSONString(body);
+
+        // String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-08\"}";
+        mockMvc.perform(post("/rentalCars/return").contentType(MediaType.APPLICATION_JSON).content(requestJson))
                 .andExpect(status().isOk())
-                //.andExpect(content().json("{\"code\":\"000000\",\"msg\":\"succeed\",\"data\":\"KY880 rent total:270.00\"}"))
                 .andExpect(content().string(Matchers.containsString("000000")))
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();

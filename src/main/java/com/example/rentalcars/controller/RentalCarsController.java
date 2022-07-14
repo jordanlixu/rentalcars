@@ -2,19 +2,25 @@ package com.example.rentalcars.controller;
 
 
 import cn.hutool.core.date.DateUtil;
-import com.example.rentalcars.common.Constants;
 import com.example.rentalcars.common.ResultEntity;
 import com.example.rentalcars.model.RentalCars;
+import com.example.rentalcars.model.dto.ReturnCarDto;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import com.example.rentalcars.model.dto.RentDto;
 import com.example.rentalcars.service.RentalCarsService;
 import io.swagger.annotations.ApiOperation;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/rentalCars")
@@ -28,62 +34,60 @@ public class RentalCarsController {
     }
 
     @ApiOperation(value = "rent a car", notes="租车接口,按日计费，时间格式为yyyy-MM-dd")
-    @PostMapping("")
-    @ResponseBody
-    public ResultEntity rentCar(@RequestBody RentalCars rentalInfo){
-        if(rentalInfo.getCarId() == null || rentalInfo.getCarId().isEmpty()){
-            return new ResultEntity(Constants.FAIL_CODE,"车牌号不能为空");
+    @PostMapping("rent")
+    public ResponseEntity<ResultEntity> rentCar(@RequestBody @Valid RentDto rentDto){
+        if(rentDto.getEndDay().before(rentDto.getStartDay())){
+            return new ResponseEntity<>(ResultEntity.getErrorEntity("取车日期不能滞后于还车日期"),HttpStatus.OK);
         }
-        if(rentalInfo.getPhoneNum() == null || rentalInfo.getPhoneNum().isEmpty()){
-            return new ResultEntity(Constants.FAIL_CODE,"手机号不能为空");
+        if(rentalCarsService.isTheCarRentedInSpecificTime(rentDto.getCarId(),rentDto.getStartDay(),rentDto.getEndDay())){
+            return new ResponseEntity<>(ResultEntity.getErrorEntity("在选择的时间段已被租用"),HttpStatus.OK);
         }
-        if(rentalInfo.getStartDay() == null || rentalInfo.getEndDay() == null){
-            return new ResultEntity(Constants.FAIL_CODE,"租车或还车时间不能为空");
-        }
-        if(rentalCarsService.isTheCarRentedInSpecificTime(rentalInfo.getCarId(),rentalInfo.getStartDay(),rentalInfo.getEndDay())){
-            return new ResultEntity(Constants.FAIL_CODE,"这个车在您选择的时间段已被其他客户租用");
-        }
-        if(rentalInfo.getEndDay().before(rentalInfo.getStartDay())){
-            return new ResultEntity(Constants.FAIL_CODE,"取车日期滞后于还车日期");
-        }
-        BigDecimal rent = rentalCarsService.calcRent(rentalInfo.getStartDay(),rentalInfo.getEndDay(),rentalInfo.getCarId());
-        rentalInfo.setRent(rent);
-        rentalInfo.setReturnFlag("N");
-        rentalInfo.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        rentalInfo.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-        rentalCarsService.save(rentalInfo);
-        return new ResultEntity(rentalInfo.getCarId()+ " rent total:"+ rentalInfo.getRent());
+        BigDecimal rent = rentalCarsService.calcRent(rentDto.getStartDay(),rentDto.getEndDay(),rentDto.getCarId());
+        RentalCars rental = rentDto.toRentalCars(rent);
+        rentalCarsService.save(rental);
+        ResultEntity result = new ResultEntity(rent.toString());
+        result.setMsg(rentDto.getCarId()+ " rent total:"+ rent);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @ApiOperation(value = "return the car", notes="还车")
-    @PostMapping("returnCar")
-    @ResponseBody
-    public ResultEntity returnCar(@ApiParam(value = "还车接口，车牌和手机号必填，startDay、endDay非必填",required = true) @RequestBody RentalCars returnCar){
-          Optional<RentalCars> opRental = rentalCarsService.queryCustomerRentalInfo(returnCar.getCarId(),returnCar.getPhoneNum());
+    @PostMapping("return")
+    public ResponseEntity<ResultEntity> returnCar(@ApiParam(value = "还车日期格式yyyy-MM-dd",required = true) @RequestBody @Valid ReturnCarDto returnCarDto){
+          Optional<RentalCars> opRental = rentalCarsService.queryCustomerRentalInfo(returnCarDto.getId(),returnCarDto.getPhoneNum());
           if(!opRental.isPresent()){
-              return  ResultEntity.getErrorEntity("There is no car to return.");
+              return  new ResponseEntity<>(ResultEntity.getErrorEntity("There is no car to return."),HttpStatus.BAD_REQUEST);
           }
           RentalCars rental = opRental.get();
-          if (returnCar.getStartDay()!= null && dayNotEquals(rental.getStartDay(), returnCar.getStartDay())){
-            return  ResultEntity.getErrorEntity("租车开始时间不正确");
-          }
-          if(returnCar.getEndDay() == null){
-              returnCar.setEndDay(DateUtil.endOfDay(new java.util.Date()).toSqlDate());
-          }
-          if (dayNotEquals(returnCar.getEndDay(), rental.getEndDay())){
-              rental.setEndDay(returnCar.getEndDay());
-              rental.setRent(rentalCarsService.calcRent(rental.getStartDay(),rental.getEndDay(),rental.getCarId()));
+//          Date today = DateUtil.endOfDay(new java.util.Date()).toSqlDate();
+//          if (dayNotEquals(today, rental.getEndDay())){
+//              rental.setEndDay(today);
+//              rental.setRent(rentalCarsService.calcRent(rental.getStartDay(),rental.getEndDay(),rental.getCarId()));
+//          }
+          Date returnDay = DateUtil.endOfDay(returnCarDto.getEndDay()).toSqlDate();
+          if (dayNotEquals(returnDay, rental.getEndDay())){
+                rental.setEndDay(returnDay);
+                rental.setRent(rentalCarsService.calcRent(rental.getStartDay(),rental.getEndDay(),rental.getCarId()));
           }
           rental.setReturnFlag("Y");
           rental.setUpdateTime(new Timestamp(System.currentTimeMillis()));
           rentalCarsService.save(rental);
-          return new ResultEntity(rental.getCarId() + " rent total:"+ rental.getRent());
+          ResultEntity result = new ResultEntity(rental);
+          result.setMsg(rental.getCarId()+ " rent total:"+ rental.getRent());
+          return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+
+    @ApiOperation(value = "query Rented Cars ", notes="查询租借的车列表")
+    @GetMapping (value = "/query")
+    public ResponseEntity<ResultEntity> queryRentedCars(@ApiParam(value = "客户手机号",required = true) @RequestParam String phoneNum){
+        List<RentalCars> list = rentalCarsService.queryRentedCars(phoneNum,"N");
+        ResultEntity result = new ResultEntity(list);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 
     @ApiOperation(value = "clear rental data", notes="清除数据")
     @PostMapping("clear")
-    @ResponseBody
     public ResultEntity clear(){
         rentalCarsService.clear();
         return new ResultEntity("cleared");

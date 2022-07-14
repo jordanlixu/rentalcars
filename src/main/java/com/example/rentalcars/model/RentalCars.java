@@ -3,6 +3,8 @@ package com.example.rentalcars.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -11,6 +13,8 @@ import java.sql.Timestamp;
 
 @Entity
 @Table
+@Data
+@Accessors(chain = true)
 @ApiModel("租车明细类")
 public class RentalCars {
 
@@ -55,80 +59,6 @@ public class RentalCars {
     @Column(name = "update_time")
     @ApiModelProperty(value = "更新时间",hidden = true)
     private Timestamp updateTime;
-
-
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getPhoneNum() {
-        return phoneNum;
-    }
-
-    public void setPhoneNum(String phoneNum) {
-        this.phoneNum = phoneNum;
-    }
-
-    public String getCarId() {
-        return carId;
-    }
-
-    public void setCarId(String carId) {
-        this.carId = carId;
-    }
-
-    public Date getStartDay() {
-        return startDay;
-    }
-
-    public void setStartDay(Date startDay) {
-        this.startDay = startDay;
-    }
-
-    public Date getEndDay() {
-        return endDay;
-    }
-
-    public void setEndDay(Date endDay) {
-        this.endDay = endDay;
-    }
-
-    public String getReturnFlag() {
-        return returnFlag;
-    }
-
-    public void setReturnFlag(String returnFlag) {
-        this.returnFlag = returnFlag;
-    }
-
-    public BigDecimal getRent() {
-        return rent;
-    }
-
-    public void setRent(BigDecimal rent) {
-        this.rent = rent;
-    }
-
-    public Timestamp getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Timestamp createTime) {
-        this.createTime = createTime;
-    }
-
-    public Timestamp getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
-    }
 
 
 }

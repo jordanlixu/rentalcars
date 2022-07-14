@@ -14,17 +14,18 @@
                     //serialize这个方法能获取到所有input 的值但是必须设置name 的属性
                 var mayData =$('#rental').serialize()
                 $.ajax({
-                    url:"/rentalCars",
+                    url:"/rentalCars/rent",
                     type:"POST",
                     data:JSON.stringify($('#rental').serializeObject()),
                     contentType:"application/json",  //缺失会出现URL编码，无法转成json对象
                     async: false
                 }).success(function (responseData) {
-                    if(responseData.code == "111111"){
+                        console.log(responseData);//打印Json数据
                         alert(responseData.msg)
-                    }else {
-                        alert("成功租车 "+responseData.data)
-                    }
+                   // alert(responseData.data)
+                }).error(function (error) {
+                    console.log(error)
+                    alert(error)
                 })
             })
         })
@@ -39,7 +40,7 @@
          //serialize这个方法能获取到所有input 的值但是必须设置name 的属性
          var mayData =$('#rental').serialize()
          $.ajax({
-             url:"/rentalCars/returnCar",
+             url:"/rentalCars/return",
              type:"POST",
              data:JSON.stringify($('#rental').serializeObject()),
              contentType:"application/json",  //缺失会出现URL编码，无法转成json对象
@@ -113,10 +114,9 @@
     <div>取车时间 <input name="startDay" type="text" size="10"/> 格式"yyyy-MM-dd"</div>
     <div>还车时间 <input name="endDay" type="text" size="10"/> 格式"yyyy-MM-dd"</div>
 <br><br>
-<div><input id="rentCar" type="submit" value="租车" />          <input id="returnCar" type="submit" value="还车" /> </div>
-<div><input id="clear" type="submit" value="清除数据" /></div>
+<div><input id="rentCar" type="submit" value="租车" />      <input id="clear" type="submit" value="清除数据" /></div>
 </form>
 
-	
+
 </body>
 </html>
