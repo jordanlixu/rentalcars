@@ -58,11 +58,6 @@ public class RentalCarsController {
               return  new ResponseEntity<>(ResultEntity.getErrorEntity("There is no car to return."),HttpStatus.BAD_REQUEST);
           }
           RentalCars rental = opRental.get();
-//          Date today = DateUtil.endOfDay(new java.util.Date()).toSqlDate();
-//          if (dayNotEquals(today, rental.getEndDay())){
-//              rental.setEndDay(today);
-//              rental.setRent(rentalCarsService.calcRent(rental.getStartDay(),rental.getEndDay(),rental.getCarId()));
-//          }
           Date returnDay = DateUtil.endOfDay(returnCarDto.getEndDay()).toSqlDate();
           if (dayNotEquals(returnDay, rental.getEndDay())){
                 rental.setEndDay(returnDay);

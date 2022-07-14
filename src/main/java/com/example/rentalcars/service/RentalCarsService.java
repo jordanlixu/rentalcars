@@ -8,6 +8,7 @@ import com.example.rentalcars.model.RentalCars;
 import com.example.rentalcars.repository.CarsRepository;
 import com.example.rentalcars.repository.RentalCarsRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -31,27 +32,19 @@ public class RentalCarsService {
         rentalCarsRepository.save(rentalInfo);
     }
 
+    @Transactional
     public boolean isTheCarRentedInSpecificTime(String carId, Date startDay, Date endDay) {
         Car car = carsRepository.findCarByCarId(carId);
         if (car==null){
             throw new IllegalArgumentException("车牌号不存在");
         }
-        boolean isTheCarRented = false;
         List<RentalCars> list  = rentalCarsRepository.findRentalCarsByCarIdAndReturnFlag(carId,"N");
-        for (RentalCars rentalInfo:list) {
-            if(rentalInfo.getStartDay().after(endDay)||rentalInfo.getEndDay().before(startDay)){
-                continue;
-            }else {
-                isTheCarRented = true;
-                break;
-            }
-        }
-       return isTheCarRented;
+        boolean isTheCarNotRented = list.stream().allMatch(i -> i.getStartDay().after(endDay)||i.getEndDay().before(startDay));
+        return !isTheCarNotRented;
     }
 
+
     public BigDecimal calcRent(Date startDay, Date endDay, String carId){
-//        long difference = (endDay.getTime()-startDay.getTime())/86400000;
-//        long days = Math.abs(difference)+1;  //按天计算费用
         if(endDay.before(startDay)){
             return new BigDecimal(0);
         }
@@ -67,8 +60,7 @@ public class RentalCarsService {
     }
 
     public  Optional<RentalCars>  queryCustomerRentalInfo(long id, String phoneNum) {
-        Optional<RentalCars> rental  = rentalCarsRepository.findRentalCarsByIdAndPhoneNumAndReturnFlag(id,phoneNum,"N");
-        return rental ;
+        return  rentalCarsRepository.findRentalCarsByIdAndPhoneNumAndReturnFlag(id,phoneNum,"N");
     }
 
     public void clear(){

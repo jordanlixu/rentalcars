@@ -1,10 +1,8 @@
 package com.example.rentalcars;
 
 
-import cn.hutool.json.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.example.rentalcars.common.Constants;
-import com.example.rentalcars.common.ResultEntity;
 import com.example.rentalcars.controller.RentalCarsController;
 import com.alibaba.fastjson.JSONObject;
 import org.hamcrest.Matchers;
@@ -28,7 +26,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RunWith(SpringRunner.class)
@@ -43,9 +40,8 @@ public class RentalCarsControllerTest extends AbstractTransactionalJUnit4SpringC
 
 
     @Before
-    public void setup() throws Exception {
+    public void setup()  {
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
-        //mockMvc.perform(post("/rentalCars/clear").contentType(MediaType.APPLICATION_JSON).content(""));
     }
 
 
@@ -137,11 +133,9 @@ public class RentalCarsControllerTest extends AbstractTransactionalJUnit4SpringC
 
         MvcResult mvcResult = mockMvc.perform(get("/rentalCars/query?phoneNum=13760403346")).andReturn();
         String content = mvcResult.getResponse().getContentAsString();
-        JSONArray object = (JSONArray)JSONObject.parseObject(content).get("data");
-        JSONObject object1 =(JSONObject)object.get(0);
-        Integer id = (Integer)object1.get("id");
+        Integer id = getId(content);
         body.clear();
-        body.put("id",id.intValue());
+        body.put("id",id);
         body.put("phoneNum","13760403346");
         body.put("endDay","2022-07-10");
         requestJson =JSONObject.toJSONString(body);
@@ -153,5 +147,11 @@ public class RentalCarsControllerTest extends AbstractTransactionalJUnit4SpringC
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
 
+    }
+
+    private Integer getId(String content) {
+        JSONArray object = (JSONArray)JSONObject.parseObject(content).get("data");
+        JSONObject object1 =(JSONObject)object.get(0);
+        return (Integer)object1.get("id");
     }
 }
