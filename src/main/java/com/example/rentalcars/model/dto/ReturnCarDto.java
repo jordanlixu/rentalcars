@@ -10,7 +10,7 @@ import java.sql.Date;
 @Data
 public class ReturnCarDto {
 
-    @NotNull(message = "ID is required")
+    @Positive(message = "ID is required")
     @ApiModelProperty(value = "记录的唯一id")
     private long id;
 

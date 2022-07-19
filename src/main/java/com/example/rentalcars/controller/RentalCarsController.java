@@ -82,7 +82,7 @@ public class RentalCarsController {
 
 
     @ApiOperation(value = "clear rental data", notes="清除数据")
-    @PostMapping("clear")
+    @DeleteMapping("clear")
     public ResultEntity clear(){
         rentalCarsService.clear();
         return new ResultEntity("cleared");

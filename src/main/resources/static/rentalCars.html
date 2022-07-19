@@ -3,10 +3,22 @@
 <head> 
 <meta charset="utf-8"> 
 <title>租车易</title> 
-<script src="https://cdn.staticfile.org/jquery/2.2.4/jquery.min.js"></script>	
+<script src="https://cdn.staticfile.org/jquery/2.2.4/jquery.min.js"></script>
+<style>
+    table {
+        width: 600px;
+        text-align: center;
+        border: 1px solid #000;
+        border-collapse: collapse;
+        margin: 30px auto;
+    }
+
+    table tr {
+        border: 1px solid #000;
+    }
+</style>
 <script>	
  $(function(){
-           // $("#rental").on('submit',function(e){
            $("#rentCar").click(function(e) {
                     //阻止表单的默认提交事件
                     e.preventDefault()
@@ -22,7 +34,7 @@
                 }).success(function (responseData) {
                         console.log(responseData);//打印Json数据
                         alert(responseData.msg)
-                   // alert(responseData.data)
+                        query($('#rental').serializeObject()['phoneNum']);
                 }).error(function (error) {
                     console.log(error)
                     alert(error)
@@ -30,31 +42,23 @@
             })
         })
 
-
- $(function(){
-     // $("#rental").on('submit',function(e){
-     $("#returnCar").click(function(e) {
-         //阻止表单的默认提交事件
-         e.preventDefault()
-        // alert("456")
-         //serialize这个方法能获取到所有input 的值但是必须设置name 的属性
-         var mayData =$('#rental').serialize()
-         $.ajax({
-             url:"/rentalCars/return",
-             type:"POST",
-             data:JSON.stringify($('#rental').serializeObject()),
-             contentType:"application/json",  //缺失会出现URL编码，无法转成json对象
-             async: false
-         }).success(function (responseData) {
-             if(responseData.code == "111111"){
-                 alert(responseData.msg)
-             }else {
-                 alert("成功还车 "+responseData.data)
-             }
-         })
-     })
- })
-
+function returnCarPost(index) {
+        $.ajax({
+            url:"/rentalCars/return",
+            type:"POST",
+          //  data:JSON.stringify($('#returnCar').serializeObject()),
+            data: JSON.stringify(rentalData[index]),
+            contentType:"application/json",  //缺失会出现URL编码，无法转成json对象
+            async: false
+        }).success(function (responseData) {
+            if(responseData.code == "111111"){
+                alert(responseData.msg)
+            }else {
+                alert("成功还车")
+            }
+        })
+        query(rentalData[index]['phoneNum'])
+}
 
  $(function(){
      // $("#rental").on('submit',function(e){
@@ -62,10 +66,10 @@
          //阻止表单的默认提交事件
          e.preventDefault()
          //alert("789")
-         //serialize这个方法能获取到所有input 的值但是必须设置name 的属性
+         $('#list').html('');
          $.ajax({
              url:"/rentalCars/clear",
-             type:"POST",
+             type:"DELETE",
              data:JSON.stringify($('#rental').serializeObject()),
              contentType:"application/json",  //缺失会出现URL编码，无法转成json对象
              async: false
@@ -99,6 +103,45 @@
      });
      return o;
  };
+
+ var rentalData
+ function query(phoneNum) {
+     var url = '/rentalCars/query?phoneNum='+phoneNum
+     $.ajax({
+         url: url,
+         type:'get',
+         dataType:'json',
+         success:function(data){
+             console.log(data.data)
+             rentalData = data.data;
+             var tbody = document.querySelector('tbody')
+             $('#list').html('');
+             //1.先循环遍历users
+             rentalData.forEach(function(item, index) {
+                 //item就是rentalData里面的每一个数据
+                 console.log(item);
+                 //每循环一次就要生成tr标签
+                 var tr = document.createElement('tr')
+                 var keys = ["id", "phoneNum", "carId","startDay","endDay"];
+                 keys.forEach(function (key,index){
+                     //生成td标签
+                     var td = document.createElement('td')
+                     //然后把内容添加到td内
+                     td.innerHTML = item[key]
+                     //把td再插入到tr标签内
+                     tr.appendChild(td)
+                 })
+                 var td = document.createElement('td')
+                 td.innerHTML = '<button  onclick="returnCarPost(\'' + index + '\')" /> 还车</button>'
+                 tr.appendChild(td)
+                 tbody.appendChild(tr)
+             })
+         },
+         error:function(){
+             console.log('请求出错！');
+         }
+     })
+ }
 </script>
 </head> 
 <body>
@@ -117,6 +160,21 @@
 <div><input id="rentCar" type="submit" value="租车" />      <input id="clear" type="submit" value="清除数据" /></div>
 </form>
 
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>手机号</th>
+        <th>车牌号</th>
+        <th>取车时间</th>
+        <th>还车时间</th>
+        <th>操作</th>
 
+    </tr>
+    </thead>
+    <tbody id="list">
+    <!-- 渲染页面 -->
+    </tbody>
+</table>
 </body>
 </html>
