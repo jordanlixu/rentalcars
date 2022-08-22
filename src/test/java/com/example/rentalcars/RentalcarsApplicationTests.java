@@ -31,7 +31,7 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
- class RentalcarsApplicationTests extends AbstractTransactionalJUnit4SpringContextTests {
+public class RentalcarsApplicationTests extends AbstractTransactionalJUnit4SpringContextTests {
 
     @Autowired
     private RentalCarsController controller;
