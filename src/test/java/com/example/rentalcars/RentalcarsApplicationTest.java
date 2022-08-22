@@ -24,7 +24,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -33,7 +32,7 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class RentalcarsApplicationTests extends AbstractTransactionalJUnit4SpringContextTests {
+public class RentalcarsApplicationTest extends AbstractTransactionalJUnit4SpringContextTests {
 
     @Autowired
     private RentalCarsController controller;
