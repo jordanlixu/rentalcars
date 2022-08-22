@@ -154,8 +154,4 @@ public class RentalcarsApplicationTest extends AbstractTransactionalJUnit4Spring
         return (Integer) object1.get("id");
     }
 
-    @Test
-    public void Test_05_ShouldFail() throws Exception {
-        Assertions.assertEquals(4, 1 + 6);
-    }
 }
