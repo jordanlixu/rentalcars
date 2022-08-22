@@ -157,6 +157,6 @@ public class RentalcarsApplicationTests extends AbstractTransactionalJUnit4Sprin
 
     @Test
     public void Test_05_ShouldFail() throws Exception {
-        Assertions.assertEquals(4, 1 + 2);
+        Assertions.assertEquals(4, 1 + 6);
     }
 }
