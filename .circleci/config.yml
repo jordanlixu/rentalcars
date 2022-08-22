@@ -1,34 +1,4 @@
-  Skip to content
-    Search or jump to…
-    Pull requests
-    Issues
-    Marketplace
-    Explore
-    
-    @jordanlixu
-    discospiff
-    /
-    SpringBootMicroservicesWithIntelliJIDEA
-    Public
-    Code
-    Issues
-    28
-    Pull requests
-    1
-    Actions
-    Projects
-    12
-    Security
-    Insights
-    SpringBootMicroservicesWithIntelliJIDEA/.circleci/config.yml
-    @discospiff
-    discospiff Add CI/CD configuration file
-    Latest commit 2f40b55 on 21 Sep 2020
-    History
-    1 contributor
-    34 lines (24 sloc)  1.59 KB
-
-  version: 2 # use CircleCI 2.0
+ version: 2 # use CircleCI 2.0
   jobs: # a collection of steps
     build: # runs not using Workflows must have a `build` job as entry point
 
@@ -60,5 +30,5 @@
 
         - store_artifacts: # store the uberjar as an artifact
             # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
-            path: target/demo-java-spring-0.0.1-SNAPSHOT.jar
+            path: target/rentalcars-0.0.1-SNAPSHOT.jar
         # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
