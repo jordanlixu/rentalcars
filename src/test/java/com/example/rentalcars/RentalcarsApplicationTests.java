@@ -9,6 +9,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -40,25 +42,23 @@ public class RentalcarsApplicationTests extends AbstractTransactionalJUnit4Sprin
 
 
     @Before
-    public void setup()  {
+    public void setup() {
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
 
-
-
     @Test
-    public void Test_01_RentCarSuccess() throws Exception{
+    public void Test_01_RentCarSuccess() throws Exception {
         Map<String, String> body = new HashMap<>();
-        body.put("phoneNum","13760403346");
-        body.put("carId","KY880");
-        body.put("startDay","2022-07-06");
-        body.put("endDay","2022-07-08");
-        String requestJson =JSONObject.toJSONString(body);
+        body.put("phoneNum", "13760403346");
+        body.put("carId", "KY880");
+        body.put("startDay", "2022-07-06");
+        body.put("endDay", "2022-07-08");
+        String requestJson = JSONObject.toJSONString(body);
         Map<String, String> expectResponseBody = new HashMap<>();
         expectResponseBody.put("code", Constants.SUCCESS_CODE);
-        expectResponseBody.put("msg","KY880 rent total:270.00");
-        expectResponseBody.put("data",new BigDecimal("270.00").toString());
+        expectResponseBody.put("msg", "KY880 rent total:270.00");
+        expectResponseBody.put("data", new BigDecimal("270.00").toString());
         String expectJson = JSONObject.toJSONString(expectResponseBody);
         // String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-08\"}";
         mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson))
@@ -70,18 +70,18 @@ public class RentalcarsApplicationTests extends AbstractTransactionalJUnit4Sprin
     }
 
     @Test
-    public void Test_02_RentTheSameCarAtAnotherTimeSuccess() throws Exception{
+    public void Test_02_RentTheSameCarAtAnotherTimeSuccess() throws Exception {
         Map<String, String> body = new HashMap<>();
-        body.put("phoneNum","13760403346");
-        body.put("carId","KY880");
-        body.put("startDay","2022-07-06");
-        body.put("endDay","2022-07-08");
-        String requestJson =JSONObject.toJSONString(body);
+        body.put("phoneNum", "13760403346");
+        body.put("carId", "KY880");
+        body.put("startDay", "2022-07-06");
+        body.put("endDay", "2022-07-08");
+        String requestJson = JSONObject.toJSONString(body);
 
         mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson)).andReturn();
-        body.put("startDay","2022-07-09");
-        body.put("endDay","2022-07-10");
-        requestJson =JSONObject.toJSONString(body);
+        body.put("startDay", "2022-07-09");
+        body.put("endDay", "2022-07-10");
+        requestJson = JSONObject.toJSONString(body);
 
         // String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-08\"}";
         mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson))
@@ -94,19 +94,19 @@ public class RentalcarsApplicationTests extends AbstractTransactionalJUnit4Sprin
 
 
     @Test
-    public void Test_03_RentTheSameCarAtOverlappedTimeFail() throws Exception{
+    public void Test_03_RentTheSameCarAtOverlappedTimeFail() throws Exception {
 
         Map<String, String> body = new HashMap<>();
-        body.put("phoneNum","13760403346");
-        body.put("carId","KY880");
-        body.put("startDay","2022-07-06");
-        body.put("endDay","2022-07-08");
-        String requestJson =JSONObject.toJSONString(body);
+        body.put("phoneNum", "13760403346");
+        body.put("carId", "KY880");
+        body.put("startDay", "2022-07-06");
+        body.put("endDay", "2022-07-08");
+        String requestJson = JSONObject.toJSONString(body);
 
         mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson)).andReturn();
-        body.put("startDay","2022-07-07");
-        body.put("endDay","2022-07-10");
-        requestJson =JSONObject.toJSONString(body);
+        body.put("startDay", "2022-07-07");
+        body.put("endDay", "2022-07-10");
+        requestJson = JSONObject.toJSONString(body);
 
         // String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-08\"}";
         mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson))
@@ -119,15 +119,15 @@ public class RentalcarsApplicationTests extends AbstractTransactionalJUnit4Sprin
     }
 
     @Test
-    public void Test_04_ReturnTheCar() throws Exception{
+    public void Test_04_ReturnTheCar() throws Exception {
 
 
         Map<String, Object> body = new HashMap<>();
-        body.put("phoneNum","13760403346");
-        body.put("carId","KY880");
-        body.put("startDay","2022-07-06");
-        body.put("endDay","2022-07-08");
-        String requestJson =JSONObject.toJSONString(body);
+        body.put("phoneNum", "13760403346");
+        body.put("carId", "KY880");
+        body.put("startDay", "2022-07-06");
+        body.put("endDay", "2022-07-08");
+        String requestJson = JSONObject.toJSONString(body);
         mockMvc.perform(post("/rentalCars/rent").contentType(MediaType.APPLICATION_JSON).content(requestJson)).andReturn();
 
 
@@ -135,10 +135,10 @@ public class RentalcarsApplicationTests extends AbstractTransactionalJUnit4Sprin
         String content = mvcResult.getResponse().getContentAsString();
         Integer id = getId(content);
         body.clear();
-        body.put("id",id);
-        body.put("phoneNum","13760403346");
-        body.put("endDay","2022-07-10");
-        requestJson =JSONObject.toJSONString(body);
+        body.put("id", id);
+        body.put("phoneNum", "13760403346");
+        body.put("endDay", "2022-07-10");
+        requestJson = JSONObject.toJSONString(body);
 
         // String requestJson = "{\"phoneNum\":\"13760403346\",\"carId\":\"KY880\",\"startDay\":\"2022-07-06\",\"endDay\":\"2022-07-08\"}";
         mockMvc.perform(post("/rentalCars/return").contentType(MediaType.APPLICATION_JSON).content(requestJson))
@@ -150,8 +150,13 @@ public class RentalcarsApplicationTests extends AbstractTransactionalJUnit4Sprin
     }
 
     private Integer getId(String content) {
-        JSONArray object = (JSONArray)JSONObject.parseObject(content).get("data");
-        JSONObject object1 =(JSONObject)object.get(0);
-        return (Integer)object1.get("id");
+        JSONArray object = (JSONArray) JSONObject.parseObject(content).get("data");
+        JSONObject object1 = (JSONObject) object.get(0);
+        return (Integer) object1.get("id");
+    }
+
+    @Test
+    public void Test_05_ShouldFail() throws Exception {
+        Assertions.assertEquals(4, 1 + 2);
     }
 }
